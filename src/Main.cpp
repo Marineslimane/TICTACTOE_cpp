@@ -1,8 +1,8 @@
-#include "Player.hpp"
+#include "Game.hpp"
 
 int main()
 {
+    void start_menu();
 
-    Player player { create_player() } ;
     return 0;
 }

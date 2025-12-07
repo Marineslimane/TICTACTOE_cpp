@@ -1,4 +1,3 @@
-/*définitions des structs et fonctions*/
 #include <string>
 #include <iostream>
 #include "Player.hpp"
@@ -12,15 +11,14 @@ Player create_player()
     */
 
     std::string name {};
-    std::string symbol {};
+    char symbol {};
     
     std::cout << "Hi! What's your name ?" << std::endl;
     std::cin >> name;
 
-    std::cout << "Welcome, " << name << "Please choose a symbol" << std::endl;
+    std::cout << "Welcome, " << name << ". Please choose a symbol :" << std::endl;
     std::cin >> symbol;
 
     Player player {name, symbol};
     return player;
 }
-
