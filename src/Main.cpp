@@ -2,7 +2,7 @@
 
 int main()
 {
-    void start_menu();
+    start_menu();
 
     return 0;
 }

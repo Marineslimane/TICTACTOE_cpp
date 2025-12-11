@@ -9,3 +9,5 @@ struct Player
 };
 
 Player create_player();
+
+std::string symbol_to_name(char c, Player player1, Player player2);

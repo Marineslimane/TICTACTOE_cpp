@@ -1,16 +1,21 @@
 #include <string>
-#include <iostream>
+#include <iostream> 
 #include <array>
+
+/*pour random :*/
+#include <cstdlib>
+#include <ctime>
 
 #include "Game.hpp"
 
-void draw_game_board(const std::array<std::array<char, number_columns>, number_rows>& board)
+/* FONCTIONS D'AFFICHAGE */
+void draw_game_board(const std::array<std::array<char, 3>, 3>& board)
 {
     /*
     pré-condition : 
-        board : référence vers un tableau statique (array) constant contenant 9 elts de type char
+        board : const ref of array of arrays of char
         > représente le plateau de jeu
-        > elts : 'O' ou 'X' ou '.' si aucun joueur n'a encore joué dans cette case
+        > board[i][j] == '.' si aucun joueur n'a joué dans la case
     post-condition : aucune
     effet de bord : affiche le plateau de jeu
     */
@@ -19,81 +24,108 @@ void draw_game_board(const std::array<std::array<char, number_columns>, number_r
     {
         for (int j {0}; j < 3 ; j++)
         {
-            std::cout << "| " << board[i][j];
+            std::cout << "| " << board[i][j] << " ";
         }
-        std::cout << " |" << std::endl;
+        std::cout << "|" << std::endl;
     }
 }
 
-std::array<std::array<char, number_columns>, number_rows> init_board()
+
+
+
+
+std::array<std::array<char, 3>, 3> init_board()
 {
     /*
     pré-condition : aucune
-    post-condition : renvoie un tableau statique initialisé par des '.'
+    post-condition : renvoie un array of arrays initialisé avec des '.'
     */
 
-    std::array<std::array<char, number_columns>, number_rows> board {};    
+    std::array<std::array<char, 3>, 3> board {};    
 
-    for (std::array<char, number_columns> row : board)
+    for (std::array<char, 3>& row : board)
     {
         row.fill('.');
     }
+
     return board;
 }
 
-std::string test_victory(std::array< std::array<char, number_columns>, number_rows>& board, Player player1, Player player2)
+/* FONCTIONS SANS AFFICHAGE */
+std::string test_victory(const std::array< std::array<char, 3>, 3>& board, const Player& player1, const Player& player2)
 {
-    char winner {};
-    for (int i {0} ; i < number_rows ; i++)
+    /*
+    pré-conditions : 
+        > board : const ref of array of arrays of char
+        > player1, player2 : const ref struct Player
+    post-condition : renvoie le nom du joueur gagnant ou "none" si pas de gagnant
+    */
+
+    for (int i {0} ; i < 3 ; i++)
     {
-        if (board[i][0] == board[i][1] && board[i][0] == board[i][2])
+        /*regarde sur les lignes*/
+        if (board[i][0] != '.' && board[i][0] == board[i][1] && board[i][1] == board[i][2])
         {
-            winner = board[i][0];
+            return symbol_to_name(board[i][0], player1, player2);
         }
 
-        if (board[0][i] == board[1][i] && board[2][i] == board[0][i])
+        /*regarde sur les colonnes*/
+        if (board[0][i] != '.' && board[0][i] == board[1][i] && board[1][i] == board[2][i])
         {
-            winner = board[0][i];
+            return symbol_to_name(board[0][i], player1, player2);
         }
     }
 
-    if (board[0][0] == board[1][1] && board[0][0] == board[2][2])
+    /*regarde sur les diagonales*/
+    if (board[0][0] != '.' && board[0][0] == board[1][1] && board[0][0] == board[2][2])
     {
-        winner = board[0][0];
+        return symbol_to_name(board[0][0], player1, player2);
     }
-    if (board[0][2] == board[1][1] && board[0][2] == board[2][0])
+    if (board[0][2] != '.' && board[0][2] == board[1][1] && board[0][2] == board[2][0])
     {
-        winner = board[0][2];
+        return symbol_to_name(board[1][1], player1, player2);
     }
 
-    if (winner == player1.symbol)
-    {
-        return "player1";
-    }
-    else if (winner == player2.symbol)
-    {
-       return "player2";
-    }
-    return ".";
+    return "none";
 }
 
-void two_players_round(std::array<std::array<char, number_columns>, number_rows>& board, Player player1, Player player2)
+void player_move(std::array<std::array<char, 3>, 3>& board, const Player& player)
 {
-    std::cout << "player 1 choose a move: " << std::endl;
-    int row1 {};
-    std::cin >> row1;
-    int column1 {};
-    std::cin >> column1;
+    /*
+    pré-conditions : 
+    > board : ref of array of arrays of char
+    > player : const ref struct Player
+    post-condition : aucune
+    effet de bord : demande à l'utilisateur de rentrer des valeurs et modifie les elts de board
+    */
 
-    board[row1][column1] = player1.symbol;
+    std::cout << "please choose a move: " << std::endl;
 
-    std::cout << "player 2 choose a move: " << std::endl;
-    int row2 {};
-    std::cin >> row2;
-    int column2 {};
-    std::cin >> column2;
+    int row {};
+    int column {};
+    std::cin >> row >> column;
 
-    board[row2][column2] = player2.symbol;
+    board[row][column] = player.symbol;
+}
+
+void two_players_round(std::array<std::array<char, 3>, 3>& board, const Player& player1, const Player& player2)
+{
+    /*
+    pré-conditions : 
+    > board : ref of array of arrays of char
+    > player1, player 2 : const ref struct Player
+    post-condition : aucune
+    effet de bord : modifie les elts de board
+    */
+    
+    player_move(board, player1);
+    draw_game_board(board);
+
+    /*player2 joue seulement si le coup de player1 n'était pas gagnant*/
+    if (test_victory(board, player1, player2) == "none")
+    {
+        player_move(board, player2);
+    }
 }
 
 void two_players_mode()
@@ -104,21 +136,21 @@ void two_players_mode()
     std::cout << "player 2 : " << std::endl;
     Player player2 { create_player() };
 
-    std::array<std::array<char, number_columns>, number_rows> board {init_board()};
+
+    std::array<std::array<char, 3>, 3> board {init_board()};
     
     int nb_tours {0};
 
-    while (test_victory(board, player1, player2) == "." || nb_tours < 9)
+    while (test_victory(board, player1, player2) == "none" && nb_tours < 9)
     {
+        draw_game_board(board);
         two_players_round(board, player1, player2);
-        test_victory(board, player1, player2);
-
         nb_tours++;
     }
 
-    if (test_victory(board, player1, player2) != ".")
+    if (test_victory(board, player1, player2) != "none")
     {
-        std::cout << test_victory(board, player1, player2) << std::endl;
+        std::cout << "the winner is :" << test_victory(board, player1, player2) << std::endl;
     }
     else 
     {
@@ -126,12 +158,27 @@ void two_players_mode()
     }
 }
 
-
 void AI_mode()
 {
+    /* création des joueurs : */
+    std::cout << "player : " << std::endl;
+    Player player { create_player() };
+    Player AI { "AI", 'O' };
+
+
+    std::array<std::array<char, 3>, 3> board {init_board()};
+    
+    int nb_tours {0};
 
 }
 
+void AI_round()
+{
+    /*random generate puis IA amelioree avec algo alpha beta
+    -->> faire verification des cin pour pas avoir des trucs impossibles
+    -->> indication sur la manière de rentrer les valeurs i,j
+    */
+}
 
 void start_menu()
 {
