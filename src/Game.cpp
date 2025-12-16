@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream> 
 #include <array>
+#include <vector>
 
 /*pour random :*/
 #include <cstdlib>
@@ -8,7 +9,7 @@
 
 #include "Game.hpp"
 
-/* FONCTIONS D'AFFICHAGE */
+/* FONCTIONS GÉNÉRALES */
 void draw_game_board(const std::array<std::array<char, 3>, 3>& board)
 {
     /*
@@ -20,19 +21,30 @@ void draw_game_board(const std::array<std::array<char, 3>, 3>& board)
     effet de bord : affiche le plateau de jeu
     */
 
+    /* affichage des indices pour faciliter la compréhension */
+    std::cout << "  ";
+    for (int j {0}; j < 3 ; j++)
+    {
+
+       std::cout << "  " << j << " ";
+    }
+    std::cout << "\n";
+
+
     for (int i {0}; i < 3 ; i++)
     {
+        /* de même, affichage des indices*/
+        std::cout << i << " ";
+
+
         for (int j {0}; j < 3 ; j++)
         {
+
             std::cout << "| " << board[i][j] << " ";
         }
         std::cout << "|" << std::endl;
     }
 }
-
-
-
-
 
 std::array<std::array<char, 3>, 3> init_board()
 {
@@ -51,7 +63,6 @@ std::array<std::array<char, 3>, 3> init_board()
     return board;
 }
 
-/* FONCTIONS SANS AFFICHAGE */
 std::string test_victory(const std::array< std::array<char, 3>, 3>& board, const Player& player1, const Player& player2)
 {
     /*
@@ -96,18 +107,58 @@ void player_move(std::array<std::array<char, 3>, 3>& board, const Player& player
     > board : ref of array of arrays of char
     > player : const ref struct Player
     post-condition : aucune
-    effet de bord : demande à l'utilisateur de rentrer des valeurs et modifie les elts de board
+    effet de bord : demande à l'utilisateur de rentrer des valeurs pour le coup à jouer et modifie les elts de board
     */
 
-    std::cout << "please choose a move: " << std::endl;
+    std::cout << "Please choose a move. To choose a move, enter the index of the row and then the index of the column :" << std::endl;
+    std::cout << "Enter row index : " << std::endl;
+    std::cout << "\n";
 
     int row {};
     int column {};
-    std::cin >> row >> column;
+    std::string line {};
+
+    while (true)
+    {
+        std::getline(std::cin, line); /* récupération de la ligne entière de l'input*/
+
+        if ((line.size() == 1) && (line[0] >= '0' && line[0] <= '2'))
+        {
+            row = line[0] - '0'; /* input valide, on le stocke dans answer*/
+            /* conversion de line[0] en int*/
+            break;
+        }
+
+        std::cout << "Invalid input. Please try again." << std::endl;
+    }
+
+    std::cout << "And column index : " << std::endl;
+    std::cout << "\n";
+
+    while (true)
+    {
+        std::getline(std::cin, line); /* récupération de la ligne entière de l'input*/
+
+        if ((line.size() == 1) && (line[0] >= '0' && line[0] <= '2'))
+        {
+            column = line[0] - '0'; /* input valide, on le stocke dans answer*/
+            break;
+        }
+
+        std::cout << "Invalid input. Please try again." << std::endl;
+    }
+
+    if (board[row][column] != '.')
+    {
+        std::cout << "That position is already taken! Try again." << std::endl;
+        player_move(board, player);
+        return; /* pour éviter d'avoir des problèmes avec le rappel de la fonction du style les symboles qui changent*/
+    }
 
     board[row][column] = player.symbol;
 }
 
+/* FONCTIONS 2 PLAYERS MODE */
 void two_players_round(std::array<std::array<char, 3>, 3>& board, const Player& player1, const Player& player2)
 {
     /*
@@ -115,7 +166,7 @@ void two_players_round(std::array<std::array<char, 3>, 3>& board, const Player& 
     > board : ref of array of arrays of char
     > player1, player 2 : const ref struct Player
     post-condition : aucune
-    effet de bord : modifie les elts de board
+    effet de bord : modifie les elts de board, affiche le plateau de jeu
     */
     
     player_move(board, player1);
@@ -125,27 +176,40 @@ void two_players_round(std::array<std::array<char, 3>, 3>& board, const Player& 
     if (test_victory(board, player1, player2) == "none")
     {
         player_move(board, player2);
+        draw_game_board(board);
     }
 }
 
 void two_players_mode()
 {
     /* création des joueurs : */
-    std::cout << "player 1 : " << std::endl;
+    std::cout << "\n";
+    std::cout << "-- PLAYER 1 --" << std::endl;
+    std::cout << "\n";
     Player player1 { create_player() };
-    std::cout << "player 2 : " << std::endl;
+    std::cout << "-- PLAYER 2 -- " << std::endl;
     Player player2 { create_player() };
+
+    while (player1.symbol == player2.symbol)
+    {
+        std::cout << "Please don't use the same symbol. Try again : " << std::endl;
+
+        std::cout << "\n";
+        std::cout << "-- PLAYER 2 -- " << std::endl;
+        player2 = create_player();
+    }
 
 
     std::array<std::array<char, 3>, 3> board {init_board()};
+    draw_game_board(board);
     
-    int nb_tours {0};
+    /* je compte un round comme les 2 joueurs qui jouent*/
+    int rounds {0};
 
-    while (test_victory(board, player1, player2) == "none" && nb_tours < 9)
+    while (test_victory(board, player1, player2) == "none" && rounds < 5)
     {
-        draw_game_board(board);
         two_players_round(board, player1, player2);
-        nb_tours++;
+        rounds++;
     }
 
     if (test_victory(board, player1, player2) != "none")
@@ -158,37 +222,129 @@ void two_players_mode()
     }
 }
 
+/* FONCTIONS AI MODE */
+void unbiased_random_move(std::array<std::array<char, 3>, 3>& board, const Player& AI)
+{
+    /*
+    pré-conditions : 
+    > board : ref of array of arrays of char
+    > AI : const ref struct Player
+    post-condition : aucune
+    effet de bord : modifie les elts de board
+
+    >> coup random de l'IA avec la méthode "non biaisée" vue en cours : récupération des cases vides puis
+    hasard sur la sélection de la case vide où jouer
+    */
+
+    /* tableau des duos d'indices correspondant à des cases vides  : */
+    std::vector<std::array<int, 2>> empty_squares {};
+
+
+    for (int i {0}; i < 3 ; i++)
+    {
+        for (int j {0}; j < 3 ; j++)
+        {
+            if (board[i][j] == '.')
+            {
+                empty_squares.push_back({i,j});
+            }
+        }
+    }
+
+    /* sélection random d'un duo d'indices (ici c'est l'indice du tableau des duos qui est généré): */
+    int random_index {static_cast<int>(rand() % empty_squares.size())};
+
+    /* récupération du duo d'indices grâce à l'indice random généré */
+    std::array<int, 2> random_vector {empty_squares[random_index]};
+
+    /* à la case random, l'IA joue (les indices sont rangés dans l'ordre ligne puis colonne) */
+    board[random_vector[0]][random_vector[1]] = AI.symbol;
+}
+
+void AI_round(std::array<std::array<char, 3>, 3>& board, const Player& player, const Player& AI)
+{
+    /*
+    pré-conditions : 
+    > board : ref of array of arrays of char
+    > player, AI : const ref struct Player
+    post-condition : aucune
+    effet de bord : modifie les elts de board, affiche le plateau
+    */
+    
+    player_move(board, player);
+    draw_game_board(board);
+
+    /*AI joue seulement si le coup de player n'était pas gagnant*/
+    if (test_victory(board, player, AI) == "none")
+    {
+        unbiased_random_move(board, AI);
+        std::cout << " " << std::endl;
+        std::cout << "AI move : " << std::endl;
+        std::cout << " " << std::endl;
+        draw_game_board(board);
+    }
+}
+
 void AI_mode()
 {
     /* création des joueurs : */
     std::cout << "player : " << std::endl;
     Player player { create_player() };
-    Player AI { "AI", 'O' };
+    Player AI { "AI", 'A' };
 
 
     std::array<std::array<char, 3>, 3> board {init_board()};
+    draw_game_board(board);
     
-    int nb_tours {0};
+    /* je compte un round comme les 2 joueurs qui jouent*/
+    int rounds {0};
 
+    while (test_victory(board, player, AI) == "none" && rounds < 5)
+    {
+        AI_round(board, player, AI);
+        rounds++;
+    }
+
+    if (test_victory(board, player, AI) != "none")
+    {
+        std::cout << "the winner is :" << test_victory(board, player, AI) << std::endl;
+    }
+    else 
+    {
+        std::cout << "it's a tie" << std::endl;
+    }
 }
 
-void AI_round()
-{
-    /*random generate puis IA amelioree avec algo alpha beta
-    -->> faire verification des cin pour pas avoir des trucs impossibles
-    -->> indication sur la manière de rentrer les valeurs i,j
-    */
-}
 
+/* FONCTION DE DÉMARRAGE */
 void start_menu()
 {
-    std::cout << "Menu démarrage : " << std::endl;
-    std::cout << "Choisir mode de jeu : " << std::endl;
-    std::cout << " 1 > 2 joueurs " << std::endl;
-    std::cout << " 2 > 1 joeur et IA " << std::endl;
+    std::cout << "\n";
+    std::cout << " ------------- START MENU ------------- " << std::endl;
+    std::cout << "\n";
+    std::cout << "       Please choose a GAMEMODE " << std::endl;
+    std::cout << "\n";
+    std::cout << "Enter the corresponding number to access the desired GAMEMODE " << std::endl;
+    std::cout << " 1 : 2 PLAYERS MODE " << std::endl;
+    std::cout << " 2 : AI vs PLAYER MODE " << std::endl;
+    std::cout << "\n";
 
+    /* vérification des inputs : */
+    std::string line {};
     char answer {};
-    std::cin >> answer;
+ 
+    while (true)
+    {
+        std::getline(std::cin, line); /* récupération de la ligne entière de l'input*/
+
+        if (line.size() == 1 && (line[0] == '1' || line[0] == '2'))
+        {
+            answer = line[0]; /* input valide, on le stocke dans answer*/
+            break;
+        }
+
+        std::cout << "Invalid input. Please try again." << std::endl;
+    }
 
     switch (answer)
     {
@@ -196,6 +352,7 @@ void start_menu()
             two_players_mode();
             break;
         case '2' :
+            srand(time(nullptr));
             AI_mode();
             break;
     }

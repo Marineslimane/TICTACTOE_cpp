@@ -10,13 +10,30 @@ Player create_player()
     effet de bord : affiche et demande à l'utilisateur d'entrer du texte
     */
 
+    std::string line {};
     std::string name {};
     char symbol {};
 
-    std::cout << "please enter your name: " << std::endl;
+    std::cout << "Please enter your NAME: " << std::endl;
     std::cin >> name;
-    std::cout << "what symbol would you like to use ? " << std::endl;
-    std::cin >> symbol;
+ 
+    std::cout << "\n";
+    std::cout << "Please choose a SYMBOL : " << std::endl;
+    
+    std::cin.ignore(1000, '\n');
+    while (true)
+    {
+        std::getline(std::cin, line); /* récupération de la ligne entière de l'input*/
+
+        if (line.size() == 1)
+        {
+            symbol = line[0]; /* input valide, on le stocke dans symbol */
+            break;
+        }
+
+        std::cout << "\n";
+        std::cout << "Invalid input. Please try again." << std::endl;
+    }
 
     Player player {name, symbol};
     return player;
