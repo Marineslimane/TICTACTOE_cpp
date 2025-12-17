@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+
 #include "Player.hpp"
 
 Player create_player()
@@ -39,8 +40,15 @@ Player create_player()
     return player;
 }
 
-std::string symbol_to_name(char c, Player player1, Player player2)
+std::string symbol_to_name(const char c, const Player& player1, const Player& player2)
 {
+    /*
+    pré-condition : 
+        > c : const char, représente le symbole rentré par l'utilisateur 
+        > player1, player2 : const ref Player
+    post-condition : renvoie le nom du joueur associé à un symbole ou "." si le symbole n'est associé à rien
+    */
+
     if (c == player1.symbol)
     {
         return player1.name;

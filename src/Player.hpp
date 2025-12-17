@@ -10,4 +10,4 @@ struct Player
 
 Player create_player();
 
-std::string symbol_to_name(char c, Player player1, Player player2);
+std::string symbol_to_name(const char c, const Player& player1, const Player& player2);
