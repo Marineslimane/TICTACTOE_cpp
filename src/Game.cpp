@@ -268,6 +268,13 @@ void two_players_mode()
 
     same_symbol_verification(player1, player2);
 
+    std::cout << "\n";
+    std::cout << "---------------------" << std::endl;
+    std::cout << "\n";
+
+    std::cout << player1.name << " will start" << std::endl;
+    std::cout << "\n";
+
     std::array<std::array<char, 3>, 3> board {init_board()};
     draw_game_board(board);
     
@@ -335,7 +342,7 @@ void AI_mode()
     /* gère le mode IA simple */
 
     /* création des joueurs : */
-    std::cout << "player : " << std::endl;
+    std::cout << "-- PLAYER -- : " << std::endl;
     Player player { create_player() };
     Player AI { "AI", 'A' };
 
@@ -518,7 +525,11 @@ void upgraded_AI_mode()
     /* gère le mode AI avancé */
 
     /* création des joueurs : */
-    std::cout << "player : " << std::endl;
+
+    std::cout << "In this mode you will battle against an AI. Please note that the AI's symbol is 'A' so don't use the same one !" << std::endl;
+    std::cout << "\n";
+
+    std::cout << "-- PLAYER -- : " << std::endl;
     Player player { create_player() };
     Player AI { "AI", 'A' };
 
@@ -573,7 +584,7 @@ void start_menu()
         case '2' :
             srand(time(nullptr));
             upgraded_AI_mode(); /* MODIFIER ICI pour le TYPE d'IA : simple (random) ou upgraded (alpha beta pruning) */
-            /* AI_mode();*/
+            /* AI_mode();*/ /* mode IA random */
             break;
     }
 }

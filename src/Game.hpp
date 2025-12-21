@@ -15,7 +15,7 @@ std::string test_victory(const std::array< std::array<char, 3>, 3>& board, const
 
 void player_move(std::array<std::array<char, 3>, 3>& board, const Player& player);
 
-std::vector<std::array<int, 2>> possible_moves(std::array<std::array<char, 3>, 3>& board);
+std::vector<std::array<int, 2>> possible_moves(const std::array<std::array<char, 3>, 3>& board);
 
 void winner_announcement(const std::array<std::array<char, 3>, 3>& board, Player& player1, Player& player2);
 
